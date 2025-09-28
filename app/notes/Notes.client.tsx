@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+  HydrationBoundary,
+  DehydratedState,
+} from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 import { fetchNotes, type FetchNotesResponse } from '../../lib/api';
 import NoteList from '@/components/NoteList/NoteList';
@@ -12,7 +18,11 @@ import NoteForm from '@/components/NoteForm/NoteForm';
 import Loader from '@/components/Loader/Loader';
 import css from './NotesPage.module.css';
 
-export default function NotesClient() {
+interface NotesClientProps {
+  dehydratedState?: DehydratedState | null;
+}
+
+const NotesClientInner = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch] = useDebounce(searchTerm, 500);
@@ -27,7 +37,6 @@ export default function NotesClient() {
     queryFn: () =>
       fetchNotes({ page: currentPage, perPage: 12, search: debouncedSearch }),
     staleTime: 5000,
-    placeholderData: keepPreviousData,
   });
 
   return (
@@ -42,6 +51,7 @@ export default function NotesClient() {
             onPageChange={setCurrentPage}
           />
         )}
+
         <button className={css.button} onClick={() => setIsModalOpen(true)}>
           Create note +
         </button>
@@ -50,9 +60,7 @@ export default function NotesClient() {
       {isLoading && <Loader />}
       {error && <p>Error loading notes: {error.message}</p>}
 
-      {data?.notes && data.notes.length > 0 && (
-        <NoteList notes={data.notes} />
-      )}
+      {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
@@ -61,5 +69,16 @@ export default function NotesClient() {
       )}
     </div>
   );
-}
+};
 
+export default function NotesClient({ dehydratedState }: NotesClientProps) {
+  const [queryClient] = useState(() => new QueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HydrationBoundary state={dehydratedState ?? undefined}>
+        <NotesClientInner />
+      </HydrationBoundary>
+    </QueryClientProvider>
+  );
+}

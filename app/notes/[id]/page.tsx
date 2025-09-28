@@ -1,5 +1,5 @@
 import { QueryClient, dehydrate } from '@tanstack/react-query';
-import { fetchNoteById } from '../../../lib/api'; // шлях до api.ts
+import { fetchNoteById } from '../../../lib/api'; 
 import NoteDetailsClient from './NoteDetails.client';
 import { notFound } from 'next/navigation';
 

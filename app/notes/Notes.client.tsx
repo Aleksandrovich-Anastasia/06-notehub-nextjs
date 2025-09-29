@@ -7,6 +7,7 @@ import {
   useQuery,
   HydrationBoundary,
   DehydratedState,
+  keepPreviousData,
 } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 import { fetchNotes, type FetchNotesResponse } from '../../lib/api';
@@ -37,6 +38,7 @@ const NotesClientInner = () => {
     queryFn: () =>
       fetchNotes({ page: currentPage, perPage: 12, search: debouncedSearch }),
     staleTime: 5000,
+    placeholderData: keepPreviousData,
   });
 
   return (

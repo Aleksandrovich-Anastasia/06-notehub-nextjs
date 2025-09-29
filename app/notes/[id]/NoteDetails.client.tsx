@@ -22,6 +22,7 @@ const NoteDetailsInner = ({ id }: { id: string }) => {
     queryKey: ['note', id],
     queryFn: () => fetchNoteById(id),
     enabled: !!id && id !== 'undefined',
+    refetchOnMount: false,
   });
 
   if (!id || id === 'undefined') return <p>Invalid note ID</p>;

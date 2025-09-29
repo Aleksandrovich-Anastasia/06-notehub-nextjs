@@ -13,7 +13,15 @@ const Modal = ({ children, onClose }: ModalProps) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+
+    // вимикаємо скрол при відкритті модалки
+    const originalStyle = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = originalStyle;
+    };
   }, [onClose]);
 
   return createPortal(
